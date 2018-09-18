@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NDbfReaderEx</RootNamespace>
     <AssemblyName>NDbfReaderEx</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BigEndianBinaryReader.cs" />
     <Compile Include="BooleanColumn.cs" />
     <Compile Include="ClipperReader.cs" />
     <Compile Include="ColumnDefinitionForCreateTable.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Int32Column.cs" />
     <Compile Include="MemoFileBase.cs" />
     <Compile Include="MemoFileDBT.cs" />
+    <Compile Include="MemoFileFPT.cs" />
     <Compile Include="NativeColumnType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

@@ -944,19 +944,23 @@ namespace NDbfReaderEx
         parameters.encoding = ReadDbfHeader_Encoding(dbfHeader.codepageCode, true);
       }
 
-      switch (memoType)
-      {
-        case MemoFileType.DBT_Ver3:
-        case MemoFileType.DBT_Ver4:
-          this._memoFile = new MemoFileDBT(fileStream, parameters.encoding, memoType, parameters.strictHeader);
-          break;
-        case MemoFileType.Undefined:
-          throw ExceptionFactory.CreateArgumentException("memoType", "There isn't information of format of the memory stream!");
-        default:
-          throw new NotImplementedException();
-      }
+        switch (memoType)
+        {
+            case MemoFileType.DBT_Ver3:
+            case MemoFileType.DBT_Ver4:
+                this._memoFile = new MemoFileDBT(fileStream, parameters.encoding, memoType, parameters.strictHeader);
+                break;
+            case MemoFileType.FPT_Ver3:
+                this._memoFile = new MemoFileFPT(fileStream, parameters.encoding, memoType, parameters.strictHeader);
+                break;
+            case MemoFileType.Undefined:
+                throw ExceptionFactory.CreateArgumentException("memoType",
+                    "There isn't information of format of the memory stream!");
+            default:
+                throw new NotImplementedException();
+        }
 
-      //
+        //
 
       var memoFields = from col in _columns
                        where col.dbfType == NativeColumnType.Memo
@@ -990,32 +994,36 @@ namespace NDbfReaderEx
       if (parameters.memoType == MemoFileType.Undefined)
       {
         parameters.memoType = DefaultMemoFileFormatForDbf();                          // calculate this from DBF header data
-      }   
+      }
 
-      switch (parameters.memoType)
-      {
-        case MemoFileType.Undefined:
-          {
-            string testFilename = Path.ChangeExtension(dataFileName, ".DBT");
-
-            if (File.Exists(testFilename))
+        switch (parameters.memoType)
+        {
+            case MemoFileType.Undefined:
             {
-              memoFileName = testFilename; 
+                string testFilename = Path.ChangeExtension(dataFileName, ".DBT");
+
+                if (File.Exists(testFilename))
+                {
+                    memoFileName = testFilename;
+                }
             }
-          }
-          break;
+                break;
 
-        case MemoFileType.DBT_Ver3:
-        case MemoFileType.DBT_Ver4:
-          memoFileName = Path.ChangeExtension(dataFileName, ".DBT");
-          break;
+            case MemoFileType.DBT_Ver3:
+            case MemoFileType.DBT_Ver4:
+                memoFileName = Path.ChangeExtension(dataFileName, ".DBT");
+                break;
+            case MemoFileType.FPT_Ver3:
+                memoFileName = Path.ChangeExtension(dataFileName, ".FPT");
+                break;
 
-        default:
-          throw new Exception(String.Format("JoinMemoFile(): untreated MemoFileType! [{0}]", parameters.memoType));
-      }      
+            default:
+                throw new Exception(String.Format("JoinMemoFile(): untreated MemoFileType! [{0}]",
+                    parameters.memoType));
+        }
 
 
-      if (String.IsNullOrWhiteSpace(memoFileName))
+        if (String.IsNullOrWhiteSpace(memoFileName))
       {      
         throw new Exception(String.Format("Don't be known the format or name of the memo/blob file for '{0}' DBF file!", this.dataFileName));
       }

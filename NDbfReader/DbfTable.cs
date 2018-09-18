@@ -499,6 +499,7 @@ namespace NDbfReaderEx
 
     internal static bool HasNewHeaderStructure(DbfTable.DbfFileTypes dbftype)
     {
+        if ((int) dbftype == 245) return false; //JOSIP: Za urel dbf-ove
       return (((int)dbftype & 0x04) != 0);
     }
     //#pragma warning restore 1591

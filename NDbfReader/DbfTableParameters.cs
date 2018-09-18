@@ -306,7 +306,9 @@ namespace NDbfReaderEx
     DBF_Ver7  = 0x07,
     
     DBF_Ver3_dBase    = DBF_Ver3 | 0x0100,
-    DBF_Ver3_Clipper  = DBF_Ver3 | 0x0200  
+    DBF_Ver3_Clipper  = DBF_Ver3 | 0x0200,
+    
+    FP_Ver2 = 0xF5
   }
 
   public enum IndexFileType                                                              // format of index file
@@ -322,6 +324,7 @@ namespace NDbfReaderEx
     DBT_Ver3,
     DBT_Ver4 //,
     //FPT
+    , FPT_Ver3 //JOSIP: Za urel dbf-ove
   }
 
   public struct DbfTableParametersReadOnly

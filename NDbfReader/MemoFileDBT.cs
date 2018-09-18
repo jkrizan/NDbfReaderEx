@@ -165,6 +165,7 @@ namespace NDbfReaderEx
           break;
 
         case MemoFileType.DBT_Ver4:
+        case MemoFileType.FPT_Ver3:
           if (stream.Length < 64)
           {
             throw new Exception("DBT MemoStream length too short! [header ver4] [" + stream.Length + " < 64]");
@@ -186,66 +187,107 @@ namespace NDbfReaderEx
         reader.BaseStream.Position = 16;
         byte versionByte = reader.ReadByte();             // dBase3:0x03   dBase4: 0x00
 
-        reader.BaseStream.Position = 20;
-        this.blockSize = reader.ReadInt16();              // dBase3:512
-
-        if (this.strictHeader > StrictHeader.none)
-        {
-          switch (memoType)
+          if (memoType == MemoFileType.DBT_Ver4)
           {
-            case MemoFileType.DBT_Ver3:
-              if ((versionByte != 0x03) && (this.strictHeader > StrictHeader.medium))
-              {
-                throw new Exception("MemoFileDBT: Invalid Memo File version byte! [" + versionByte + " is not 3]");
-              }
-
-              if (blockSize != 512) 
-              {
-                if (this.strictHeader > StrictHeader.medium)
-                {
-                  throw new Exception("MemoFileDBT: Invalid Memo File block size! [" + blockSize + " is not 512]");
-                }
-
-                blockSize = 512;
-              }
-
-              if ((this.strictHeader >= StrictHeader.weak) && (! CheckDbtFileBlocks(stream, blockSize)))
-              {
-                throw new Exception("MemoFileDBT: Invalid Memo File length! [" + stream.Length + "/" + blockSize + "]");
-              }
-
-              if ((this.strictHeader >= StrictHeader.potent) && (! CheckDbtFileAdmLength(stream)))
-              {
-                throw new Exception("MemoFileDBT: Invalid Memo File length! [next block]");
-              }
-              break;
-
-            case MemoFileType.DBT_Ver4:
-              if ((this.strictHeader >= StrictHeader.weak) && (versionByte != 0x00))
-              {
-                throw new Exception("MemoFileDBT: Invalid Memo File version byte! [" + versionByte + " is not 0]");
-              }
-
-              if ((blockSize < 64) || (blockSize > 64 * 512) || ((blockSize % 64) != 0))
-              { // Can't read/write if blockSize unknown
-                throw new Exception("MemoFileDBT: Invalid Memo File block size! [" + blockSize + " is not 512]");
-              }
-
-              if ((this.strictHeader >= StrictHeader.medium) && (! CheckDbtFileBlocks(stream, blockSize)))
-              {
-                throw new Exception("MemoFileDBT: Invalid Memo File length! [" + stream.Length + "/" + blockSize + "]");
-              }
-
-              if ((this.strictHeader >= StrictHeader.potent) && (! CheckDbtFileAdmLength(stream)))
-              {
-                throw new Exception("MemoFileDBT: Invalid Memo File length! [next block]");
-              }
-              break;
-
-            default:
-              Debug.Fail("invalid case");
-              break;
+              reader.BaseStream.Position = 6;
+              this.blockSize = reader.ReadInt16(); // FP:
           }
+          else
+          {
+              reader.BaseStream.Position = 20;
+              this.blockSize = reader.ReadInt16(); // dBase3:512
+          }
+
+          if (this.strictHeader > StrictHeader.none)
+        {
+            switch (memoType)
+            {
+                case MemoFileType.DBT_Ver3:
+                    if ((versionByte != 0x03) && (this.strictHeader > StrictHeader.medium))
+                    {
+                        throw new Exception("MemoFileDBT: Invalid Memo File version byte! [" + versionByte +
+                                            " is not 3]");
+                    }
+
+                    if (blockSize != 512)
+                    {
+                        if (this.strictHeader > StrictHeader.medium)
+                        {
+                            throw new Exception("MemoFileDBT: Invalid Memo File block size! [" + blockSize +
+                                                " is not 512]");
+                        }
+
+                        blockSize = 512;
+                    }
+
+                    if ((this.strictHeader >= StrictHeader.weak) && (!CheckDbtFileBlocks(stream, blockSize)))
+                    {
+                        throw new Exception("MemoFileDBT: Invalid Memo File length! [" + stream.Length + "/" +
+                                            blockSize + "]");
+                    }
+
+                    if ((this.strictHeader >= StrictHeader.potent) && (!CheckDbtFileAdmLength(stream)))
+                    {
+                        throw new Exception("MemoFileDBT: Invalid Memo File length! [next block]");
+                    }
+                    break;
+
+                case MemoFileType.DBT_Ver4:
+                    if ((this.strictHeader >= StrictHeader.weak) && (versionByte != 0x00))
+                    {
+                        throw new Exception("MemoFileDBT: Invalid Memo File version byte! [" + versionByte +
+                                            " is not 0]");
+                    }
+
+                    if ((blockSize < 64) || (blockSize > 64 * 512) || ((blockSize % 64) != 0))
+                    {
+                        // Can't read/write if blockSize unknown
+                        throw new Exception("MemoFileDBT: Invalid Memo File block size! [" + blockSize +
+                                            " is not 512]");
+                    }
+
+                    if ((this.strictHeader >= StrictHeader.medium) && (!CheckDbtFileBlocks(stream, blockSize)))
+                    {
+                        throw new Exception("MemoFileDBT: Invalid Memo File length! [" + stream.Length + "/" +
+                                            blockSize + "]");
+                    }
+
+                    if ((this.strictHeader >= StrictHeader.potent) && (!CheckDbtFileAdmLength(stream)))
+                    {
+                        throw new Exception("MemoFileDBT: Invalid Memo File length! [next block]");
+                    }
+                    break;
+
+                case MemoFileType.FPT_Ver3:
+                    if ((this.strictHeader >= StrictHeader.weak) && (versionByte != 0x00))
+                    {
+                        throw new Exception("MemoFileDBT: Invalid Memo File version byte! [" + versionByte +
+                                            " is not 0]");
+                    }
+
+                    if ((blockSize < 64) || (blockSize > 64 * 512) || ((blockSize % 64) != 0))
+                    {
+                        // Can't read/write if blockSize unknown
+                        throw new Exception("MemoFileDBT: Invalid Memo File block size! [" + blockSize +
+                                            " is not multiply of 64]");
+                    }
+
+                    if ((this.strictHeader >= StrictHeader.medium) && (!CheckDbtFileBlocks(stream, blockSize)))
+                    {
+                        throw new Exception("MemoFileDBT: Invalid Memo File length! [" + stream.Length + "/" +
+                                            blockSize + "]");
+                    }
+
+                    if ((this.strictHeader >= StrictHeader.potent) && (!CheckDbtFileAdmLength(stream)))
+                    {
+                        throw new Exception("MemoFileDBT: Invalid Memo File length! [next block]");
+                    }
+                    break;
+
+                default:
+                    Debug.Fail("invalid case");
+                    break;
+            }
         }
       }
 
