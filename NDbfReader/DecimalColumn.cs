@@ -39,9 +39,15 @@ namespace NDbfReaderEx
         return 0;
       }
 
-      var stringValue = Encoding.ASCII.GetString(rowBuffer, offset_ + 1, size_); 
+      var stringValue = Encoding.ASCII.GetString(rowBuffer, offset_ + 1, size_);
 
-      return decimal.Parse(stringValue, NumberStyles.Float | NumberStyles.AllowLeadingWhite, DecimalNumberFormat);
+        decimal ret;
+        if (decimal.TryParse(stringValue, NumberStyles.Float | NumberStyles.AllowLeadingWhite, DecimalNumberFormat,
+            out ret))
+        {
+            return ret;
+        }
+        return 0;
     }
 
     public override bool IsNull(byte[] rowBuffer)
